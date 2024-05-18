@@ -6,7 +6,13 @@ import logging
 import os
 from mysql.connector import connection
 
-PII_FIELDS = ("name", "email", "phone", "ssn", "password")
+PII_FIELDS = (
+    "name",
+    "email",
+    "phone",
+    "ssn",
+    "password",
+)
 
 
 def filter_datum(
@@ -17,7 +23,9 @@ def filter_datum(
 ) -> str:
     """returns the log message obfuscated"""
     for field in fields:
-        pattern = re.compile(rf"{re.escape(field)}=.*?{re.escape(separator)}")
+        pattern = re.compile(
+            rf"{re.escape(field)}=.*?{re.escape(separator)}",
+        )
         replacement = f"{field}={redaction}{separator}"
         message = re.sub(pattern, replacement, message)
     return message
@@ -38,7 +46,10 @@ class RedactingFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """Formats a log record, redacting specified fields."""
         record.msg = filter_datum(
-            self.fields, self.REDACTION, record.msg, self.SEPARATOR
+            self.fields,
+            self.REDACTION,
+            record.msg,
+            self.SEPARATOR,
         )
         return super().format(record)
 
@@ -61,7 +72,10 @@ def get_db() -> connection.MySQLConnection:
     password = os.getenv("PERSONAL_DATA_DB_PASSWORD", "")
     host = os.getenv("PERSONAL_DATA_DB_HOST", "localhost")
     return connection.MySQLConnection(
-        host=host, username=username, password=password, database=db_name
+        host=host,
+        username=username,
+        password=password,
+        database=db_name,
     )
 
 
